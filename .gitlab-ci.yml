@@ -56,10 +56,7 @@ build-backend:
     - echo "=== checking docker connectivity ==="
     - docker info || echo "ERROR: docker daemon not reachable"
     - echo "=== trying to build ==="
-    - docker build
-        -t $BACKEND_IMAGE:$CI_COMMIT_SHORT_SHA
-        -t $BACKEND_IMAGE:latest
-        ./backend
+    - docker build -t $BACKEND_IMAGE:$CI_COMMIT_SHORT_SHA -t $BACKEND_IMAGE:latest ./backend
 
 build-frontend:
   stage: build
