@@ -1,0 +1,79 @@
+stages:
+  - lint
+  - build
+  - push
+  - deploy
+
+variables:
+  BACKEND_IMAGE: $DOCKER_USERNAME/task-backend
+  FRONTEND_IMAGE: $DOCKER_USERNAME/task-frontend
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "develop"
+    - if: $CI_MERGE_REQUEST_ID
+
+# ─── LINT ───────────────────────────────────────────
+
+lint-backend:
+  stage: lint
+  image: python:3.11-alpine
+  script:
+    - pip install flake8
+    - flake8 backend/
+
+lint-frontend:
+  stage: lint
+  image: node:20-alpine
+  script:
+    - cd frontend
+    - npm install
+    - npm run lint
+
+# ─── BUILD ──────────────────────────────────────────
+
+build-backend:
+  stage: build
+  image: docker:24
+  services:
+    - docker:dind
+  script:
+    - docker build -t $BACKEND_IMAGE:$CI_COMMIT_SHORT_SHA -t $BACKEND_IMAGE:latest ./backend
+
+build-frontend:
+  stage: build
+  image: docker:24
+  services:
+    - docker:dind
+  script:
+    - docker build -t $FRONTEND_IMAGE:$CI_COMMIT_SHORT_SHA -t $FRONTEND_IMAGE:latest ./frontend
+
+# ─── PUSH ───────────────────────────────────────────
+
+push-backend:
+  stage: push
+  image: docker:24
+  services:
+    - docker:dind
+  script:
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    - docker push $BACKEND_IMAGE:$CI_COMMIT_SHORT_SHA
+    - docker push $BACKEND_IMAGE:latest
+
+push-frontend:
+  stage: push
+  image: docker:24
+  services:
+    - docker:dind
+  script:
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    - docker push $FRONTEND_IMAGE:$CI_COMMIT_SHORT_SHA
+    - docker push $FRONTEND_IMAGE:latest
+
+# ─── DEPLOY ─────────────────────────────────────────
+
+deploy:
+  stage: deploy
+  script:
+    - echo "K8s not ready yet - coming soon"
