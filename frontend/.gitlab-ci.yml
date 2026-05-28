@@ -1,0 +1,35 @@
+image: node:20
+
+
+stages: 
+  - lint
+  - build
+  
+
+
+test_frontend:
+    stage: lint
+
+    script:
+      - echo "install the dependencies..."
+      - npm ci
+
+      - echo "linting the project..."
+      - npm run lint 
+
+
+build_frontend:
+  stage: build
+
+  script:
+    - echo "Installing dependencies..." 
+    - npm ci
+
+    - echo "Building project..."
+    - npm run build
+
+  artifacts:
+    paths:
+      - dist/
+
+    expire_in: 1 week
