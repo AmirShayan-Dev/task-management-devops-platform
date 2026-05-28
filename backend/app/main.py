@@ -17,4 +17,3 @@ redis_client = redis.Redis(
 @app.get("/health")
 def health():
     return {"status": "ok"}
-
