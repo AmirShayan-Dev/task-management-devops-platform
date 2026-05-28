@@ -15,3 +15,5 @@ class Task(Base):
     title = Column(String)
     status = Column(String, default="todo")
     owner_id = Column(Integer, ForeignKey("users.id"))
+
+    
