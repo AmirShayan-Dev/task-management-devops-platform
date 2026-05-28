@@ -7,6 +7,10 @@ stages:
 variables:
   BACKEND_IMAGE: $DOCKER_USERNAME/task-backend
   FRONTEND_IMAGE: $DOCKER_USERNAME/task-frontend
+  DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_HOST: tcp://docker:2376
+  DOCKER_TLS_VERIFY: 1
+  DOCKER_CERT_PATH: "/certs/client"
 
 workflow:
   rules:
@@ -38,16 +42,32 @@ build-backend:
   image: docker:24
   services:
     - docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: $DOCKER_TLS_CERTDIR
+    DOCKER_HOST: $DOCKER_HOST
+    DOCKER_TLS_VERIFY: $DOCKER_TLS_VERIFY
+    DOCKER_CERT_PATH: $DOCKER_CERT_PATH
   script:
-    - docker build -t $BACKEND_IMAGE:$CI_COMMIT_SHORT_SHA -t $BACKEND_IMAGE:latest ./backend
+    - docker build
+        -t $BACKEND_IMAGE:$CI_COMMIT_SHORT_SHA
+        -t $BACKEND_IMAGE:latest
+        ./backend
 
 build-frontend:
   stage: build
   image: docker:24
   services:
     - docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: $DOCKER_TLS_CERTDIR
+    DOCKER_HOST: $DOCKER_HOST
+    DOCKER_TLS_VERIFY: $DOCKER_TLS_VERIFY
+    DOCKER_CERT_PATH: $DOCKER_CERT_PATH
   script:
-    - docker build -t $FRONTEND_IMAGE:$CI_COMMIT_SHORT_SHA -t $FRONTEND_IMAGE:latest ./frontend
+    - docker build
+        -t $FRONTEND_IMAGE:$CI_COMMIT_SHORT_SHA
+        -t $FRONTEND_IMAGE:latest
+        ./frontend
 
 # ─── PUSH ───────────────────────────────────────────
 
