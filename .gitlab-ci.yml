@@ -7,10 +7,10 @@ stages:
 variables:
   BACKEND_IMAGE: $DOCKER_USERNAME/task-backend
   FRONTEND_IMAGE: $DOCKER_USERNAME/task-frontend
-  DOCKER_TLS_CERTDIR: "/certs"
-  DOCKER_HOST: tcp://docker:2376
-  DOCKER_TLS_VERIFY: "1"
-  DOCKER_CERT_PATH: "/certs/client"
+  # DOCKER_TLS_CERTDIR: "/certs"
+  # DOCKER_HOST: tcp://docker:2376
+  # DOCKER_TLS_VERIFY: "1"
+  # DOCKER_CERT_PATH: "/certs/client"
 
 workflow:
   rules:
@@ -41,21 +41,17 @@ build-backend:
   stage: build
   image: docker:24
   services:
-    - docker:dind
+    - name: docker:24-dind
+      alias: docker
   variables:
-    DOCKER_TLS_CERTDIR: $DOCKER_TLS_CERTDIR
-    DOCKER_HOST: $DOCKER_HOST
-    DOCKER_TLS_VERIFY: $DOCKER_TLS_VERIFY
-    DOCKER_CERT_PATH: $DOCKER_CERT_PATH
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_VERIFY: "1"
+    DOCKER_CERT_PATH: "/certs/client"
   script:
-    - echo "=== waiting 10 seconds for dind ==="
-    - sleep 10
-    - echo "=== checking certs folder ==="
-    - "ls /certs/ || echo 'ERROR: /certs folder missing'"
-    - "ls /certs/client/ || echo 'ERROR: /certs/client folder missing or empty'"
-    - echo "=== checking docker connectivity ==="
-    - "docker info || echo 'ERROR: docker daemon not reachable'"
-    - echo "=== trying to build ==="
+    - sleep 15
+    - ls /certs/client/
+    - docker info
     - docker build -t $BACKEND_IMAGE:$CI_COMMIT_SHORT_SHA -t $BACKEND_IMAGE:latest ./backend
 
 build-frontend:
