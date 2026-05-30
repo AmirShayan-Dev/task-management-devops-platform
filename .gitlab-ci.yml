@@ -50,7 +50,9 @@ build-backend:
       --dockerfile $CI_PROJECT_DIR/backend/Dockerfile
       --destination $BACKEND_IMAGE:$CI_COMMIT_SHORT_SHA
       --destination $BACKEND_IMAGE:latest
-      
+#  now we are using kaniko after we got VPS we change it to our personal runner!
+
+
 build-frontend:
   stage: build
   image: docker:24
