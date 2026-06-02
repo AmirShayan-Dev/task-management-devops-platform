@@ -1,5 +1,8 @@
 fastapi
 uvicorn
 sqlalchemy
-redis
 psycopg2-binary
+redis
+python-jose
+passlib[bcrypt]
+pydantic
