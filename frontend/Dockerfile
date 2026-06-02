@@ -1,49 +1,65 @@
-# Stage 1: Build React app
-FROM node:20-alpine AS build
+##############
+# BUILD STAGE
+##############
+FROM node:24-bookworm-slim AS build
 
+# Set working directory inside container
 WORKDIR /app
 
+# Copy only dependency files first to leverage Docker layer caching
 COPY package*.json ./
-RUN npm install
 
+# Install dependencies in a clean, reproducible way (uses package-lock.json)
+RUN npm ci
+
+# Copy the full source code into the container
 COPY . .
+
+# Build production-ready static files (outputs to /dist)
 RUN npm run build
 
-# Stage 2: Nginx for serving the built app
-FROM nginx:alpine
 
-# Override nginx.conf to set pid to /tmp and keep default http/events config
-RUN echo 'pid /tmp/nginx.pid;' > /etc/nginx/nginx.conf && \
-    echo 'events { worker_connections 1024; }' >> /etc/nginx/nginx.conf && \
-    echo 'http {' >> /etc/nginx/nginx.conf && \
-    echo '    include /etc/nginx/mime.types;' >> /etc/nginx/nginx.conf && \
-    echo '    default_type application/octet-stream;' >> /etc/nginx/nginx.conf && \
-    echo '    client_body_temp_path /tmp/client_temp;' >> /etc/nginx/nginx.conf && \
-    echo '    proxy_temp_path /tmp/proxy_temp;' >> /etc/nginx/nginx.conf && \
-    echo '    fastcgi_temp_path /tmp/fastcgi_temp;' >> /etc/nginx/nginx.conf && \
-    echo '    uwsgi_temp_path /tmp/uwsgi_temp;' >> /etc/nginx/nginx.conf && \
-    echo '    scgi_temp_path /tmp/scgi_temp;' >> /etc/nginx/nginx.conf && \
-    echo '    include /etc/nginx/conf.d/*.conf;' >> /etc/nginx/nginx.conf && \
-    echo '}' >> /etc/nginx/nginx.conf
+#################
+# RUNTIME STAGE
+#################
+FROM nginx:stable-alpine
 
-# Create non-root user with correct permissions
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup \
-    && mkdir -p /tmp/client_temp /tmp/proxy_temp /tmp/fastcgi_temp /tmp/uwsgi_temp /tmp/scgi_temp \
-    && chown -R appuser:appgroup /tmp /usr/share/nginx \
-    && apk add --no-cache wget
+# Create non-root user and required directories for Nginx runtime
+# (prevents permission issues when running as non-root)
+RUN addgroup -S appgroup \
+ && adduser -S appuser -G appgroup \
+ && mkdir -p \
+    /tmp/client_temp \
+    /tmp/proxy_temp \
+    /tmp/fastcgi_temp \
+    /tmp/uwsgi_temp \
+    /tmp/scgi_temp \
+    /var/cache/nginx \
+    /var/log/nginx \
+ && chown -R appuser:appgroup \
+    /tmp \
+    /var/cache/nginx \
+    /var/log/nginx
 
-# Copy build output from build stage
+
+# Copy custom Nginx configuration (defines server behavior, routing, etc.)
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Copy compiled frontend build output from build stage
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copy server block config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Ensure static files are owned by non-root user for safe runtime access
+RUN chown -R appuser:appgroup /usr/share/nginx/html
 
-# Fix ownership of html and config
-RUN chown -R appuser:appgroup /usr/share/nginx/html /etc/nginx/conf.d
-
-# Run Nginx as non-root
+# Switch to non-root user for improved container security
 USER appuser
 
-# Healthcheck — must match the port nginx listens on
+# Expose application port
+EXPOSE 8080
+
+# Healthcheck to verify Nginx is serving requests correctly
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD wget -qO- http://localhost:8080/ || exit 1
+  CMD wget --spider -q http://localhost:8080/ || exit 1
+
+# Start Nginx in foreground mode 
+CMD ["nginx", "-g", "daemon off;"]
