@@ -20,18 +20,18 @@ workflow:
 
 # ─── LINT ───────────────────────────────────────────
 
-lint-backend:
-  stage: lint
-  image: pipelinecomponents/flake8:latest
-  script:
-    - flake8 backend/
-    # temporary because the shared runner of the hamgit does not access to the internet!
 # lint-backend:
 #   stage: lint
-#   image: python:3.11-alpine
+#   image: pipelinecomponents/flake8:latest
 #   script:
-#     - pip install flake8
 #     - flake8 backend/
+    # temporary because the shared runner of the hamgit does not access to the internet!
+lint-backend:
+  stage: lint
+  image: python:3.11-alpine
+  script:
+    - pip install flake8
+    - flake8 backend/
 
 lint-frontend:
   stage: lint
