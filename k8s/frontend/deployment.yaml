@@ -5,45 +5,37 @@ metadata:
   namespace: production
 spec:
   replicas: 2
-
   strategy:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 0
       maxSurge: 1
-
   selector:
     matchLabels:
       app: frontend
-
   template:
     metadata:
       labels:
         app: frontend
-
     spec:
       containers:
       - name: frontend
         image: frontend-app:latest
         imagePullPolicy: IfNotPresent
-
         ports:
         - containerPort: 8080
-
         livenessProbe:
           httpGet:
             path: /
             port: 8080
           initialDelaySeconds: 10
           periodSeconds: 10
-
         readinessProbe:
           httpGet:
             path: /
             port: 8080
           initialDelaySeconds: 5
           periodSeconds: 5
-
         resources:
           requests:
             cpu: "50m"

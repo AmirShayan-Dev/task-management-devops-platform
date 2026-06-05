@@ -1,31 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
-
 metadata:
   name: redis
   namespace: production
-
 spec:
   replicas: 1
-
   selector:
     matchLabels:
       app: redis
-
   template:
     metadata:
       labels:
         app: redis
-
     spec:
       containers:
         - name: redis
           image: redis:7-alpine
           imagePullPolicy: IfNotPresent
-
           ports:
             - containerPort: 6379
-
           resources:
             requests:
               cpu: "50m"
@@ -33,7 +26,6 @@ spec:
             limits:
               cpu: "200m"
               memory: "256Mi"
-
           livenessProbe:
             exec:
               command:
@@ -41,7 +33,6 @@ spec:
                 - ping
             initialDelaySeconds: 10
             periodSeconds: 10
-
           readinessProbe:
             exec:
               command:
