@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from .database import engine, Base
+from .routers import tasks
 import redis
 import os
 
@@ -13,7 +14,8 @@ redis_client = redis.Redis(
     decode_responses=True
 )
 
-
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+app.include_router(tasks.router)
