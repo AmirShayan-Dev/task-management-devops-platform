@@ -43,7 +43,7 @@ lint-frontend:
 
 # ─── BUILD ──────────────────────────────────────────
 
-build-backend-buildah:
+build-backend:
   stage: build
   image: quay.io/buildah/stable
   variables:
