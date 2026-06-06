@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: frontend-app:latest
+        image: amirshayandev/task-frontend:2.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
