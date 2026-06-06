@@ -14,9 +14,8 @@ redis_client = redis.Redis(
     decode_responses=True
 )
 
+
 @app.get("/health")
-
-
 def health():
     return {"status": "ok"}
 
