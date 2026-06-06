@@ -22,16 +22,10 @@ workflow:
 
 lint-backend:
   stage: lint
-  image: pipelinecomponents/flake8:latest
+  image: python:3.11-alpine
   script:
+    - pip install flake8
     - flake8 backend/
-    # temporary because the shared runner of the hamgit does not access to the internet!
-# lint-backend:
-#   stage: lint
-#   image: python:3.11-alpine
-#   script:
-#     - pip install flake8
-#     - flake8 backend/
 
 lint-frontend:
   stage: lint
@@ -45,32 +39,19 @@ lint-frontend:
 
 build-backend:
   stage: build
-  image: quay.io/buildah/stable
-  variables:
-    STORAGE_DRIVER: vfs
-    BUILDAH_FORMAT: docker
+  image: docker:24
+  services:
+    - docker:dind
   script:
-    - buildah login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD docker.io
-    - buildah bud -t $BACKEND_IMAGE:$CI_COMMIT_SHORT_SHA $CI_PROJECT_DIR/backend
-    - buildah push $BACKEND_IMAGE:$CI_COMMIT_SHORT_SHA docker://$BACKEND_IMAGE:$CI_COMMIT_SHORT_SHA
-    - buildah push $BACKEND_IMAGE:$CI_COMMIT_SHORT_SHA docker://$BACKEND_IMAGE:latest
-
+    - docker build -t $BACKEND_IMAGE:$CI_COMMIT_SHORT_SHA -t $BACKEND_IMAGE:latest ./backend
 
 build-frontend:
   stage: build
   image: docker:24
   services:
     - docker:dind
-  variables:
-    DOCKER_TLS_CERTDIR: $DOCKER_TLS_CERTDIR
-    DOCKER_HOST: $DOCKER_HOST
-    DOCKER_TLS_VERIFY: $DOCKER_TLS_VERIFY
-    DOCKER_CERT_PATH: $DOCKER_CERT_PATH
   script:
-    - docker build
-        -t $FRONTEND_IMAGE:$CI_COMMIT_SHORT_SHA
-        -t $FRONTEND_IMAGE:latest
-        ./frontend
+    - docker build -t $FRONTEND_IMAGE:$CI_COMMIT_SHORT_SHA -t $FRONTEND_IMAGE:latest ./frontend
 
 # ─── PUSH ───────────────────────────────────────────
 
