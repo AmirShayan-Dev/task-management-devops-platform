@@ -122,8 +122,12 @@ jobs:
           script: |
             set -e
 
+            
             cd /srv/task-management-devops-platform
 
+            export KUBECONFIG=/home/deploy/.kube/config
+
+            
             git fetch origin
             git checkout amirshayan
             git pull origin amirshayan
