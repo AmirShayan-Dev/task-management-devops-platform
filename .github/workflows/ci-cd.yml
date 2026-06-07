@@ -132,8 +132,8 @@ jobs:
             git checkout amirshayan
             git pull origin amirshayan
 
-            kubectl apply -f k8s/namespace/ -R
-            
+            kubectl apply -f k8s/namespaces/ -R
+
             kubectl apply -f k8s/database/ -R -n production
             kubectl apply -f k8s/redis/ -R -n production
             kubectl apply -f k8s/backend/ -R -n production
