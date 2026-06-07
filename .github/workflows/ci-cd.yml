@@ -129,8 +129,8 @@ jobs:
 
 
             git fetch origin
-            git checkout amirshayan
-            git pull origin amirshayan
+            git checkout develop
+            git pull origin develop
 
             kubectl apply -f k8s/namespaces/ -R
 
