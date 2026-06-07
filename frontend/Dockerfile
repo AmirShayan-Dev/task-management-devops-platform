@@ -1,7 +1,7 @@
 ##############
 # BUILD STAGE
 ##############
-FROM node:24-bookworm-slim AS build
+FROM node:20-bookworm-slim AS build
 
 # Set working directory inside container
 WORKDIR /app
