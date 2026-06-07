@@ -27,8 +27,8 @@ spec:
       containers:
         - name: backend
 
-          image: amirshayandev/task-backend:2.0
-          imagePullPolicy: IfNotPresent
+          image: amirshayandev/task-backend:latest
+          imagePullPolicy: Always
 
           ports:
             - containerPort: 8000

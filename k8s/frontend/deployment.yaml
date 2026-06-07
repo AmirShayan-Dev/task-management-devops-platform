@@ -20,8 +20,8 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: amirshayandev/task-frontend:2.0
-        imagePullPolicy: IfNotPresent
+        image: amirshayandev/task-frontend:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
         livenessProbe:
