@@ -3,8 +3,6 @@ name: CI/CD - Build, Push and Deploy
 on:
   push:
     branches:
-      - amirshayan
-      - develop
       - main
   workflow_dispatch:
 
@@ -122,15 +120,14 @@ jobs:
           script: |
             set -e
 
-            
-            cd /srv/task-management-devops-platform
-
             export KUBECONFIG=/home/deploy/.kube/config
 
+            cd /srv/task-management-devops-platform
 
             git fetch origin
             git checkout main
-            git pull origin main
+            git reset --hard origin/main
+            git clean -fd
 
             kubectl apply -f k8s/namespaces/ -R
 
