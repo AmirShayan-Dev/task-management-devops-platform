@@ -13,12 +13,40 @@ function App() {
 
   return (
     <div>
-      <h1>Task Manager</h1>
+      <div
+  style={{
+    textAlign: "center",
+    margin: "20px auto",
+  }}
+>
+  <div
+    style={{
+      marginBottom: "12px",
+      fontSize: "20px",
+      fontWeight: "600",
+    }}
+  >
+    chetori rifikh
+  </div>
+
+  <img
+    src={logo}
+    alt="Task Management Logo"
+    style={{
+      width: "100%",
+      maxWidth: "300px",
+      height: "auto",
+      display: "block",
+      margin: "0 auto",
+      borderRadius: "16px",
+      objectFit: "cover",
+      boxShadow: "0 10px 25px rgba(0, 0, 0, 0.2)",
+    }}
+  />
+</div>
       {tasks.map(task => (
         <div key={task.id}>
-          {/* {task.title} - {task.status} */}
-          <div>beni is here, wassup with it?!</div>
-          <img src={logo} alt="Task Management Logo" />
+          {task.title} - {task.status}
         </div>
       ))}
     </div>

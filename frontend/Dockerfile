@@ -10,12 +10,12 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm ci 
 
 # Copy the full source code into the container
 COPY . .
 
-# Buildstatic files (outputs to /dist)
+# Build static files (outputs to /dist)
 RUN npm run build
 
 
