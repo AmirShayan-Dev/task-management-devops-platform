@@ -6,7 +6,7 @@ function App() {
   const [tasks, setTasks] = useState([]);
 
   useEffect(() => {
-    fetch("/api/tasks")
+    fetch("https://www.coddit.ir/api/tasks/")
       .then(res => res.json())
       .then(data => setTasks(data));
   }, []);
