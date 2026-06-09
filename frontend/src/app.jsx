@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from "react";
+import logo from "./assets/beni.jpeg";
 
 function App() {
   const [tasks, setTasks] = useState([]);
@@ -16,6 +17,8 @@ function App() {
       {tasks.map(task => (
         <div key={task.id}>
           {task.title} - {task.status}
+	  <div>beni is here, wassup with it?!</div>
+          <img src={logo} alt="Task Management Logo" />
         </div>
       ))}
     </div>
