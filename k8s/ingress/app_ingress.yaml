@@ -28,4 +28,11 @@ spec:
               service:
                 name: backend-service
                 port:
-                  number: 8000
+                  number: 80
+          - path: /health
+            pathType: Prefix
+            backend:
+              service:
+                name: backend-service
+                port:
+                  number: 80
