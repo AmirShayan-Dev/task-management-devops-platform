@@ -16,8 +16,8 @@ function App() {
       <h1>Task Manager</h1>
       {tasks.map(task => (
         <div key={task.id}>
-          {task.title} - {task.status}
-	  <div>beni is here, wassup with it?!</div>
+          {/* {task.title} - {task.status} */}
+          <div>beni is here, wassup with it?!</div>
           <img src={logo} alt="Task Management Logo" />
         </div>
       ))}

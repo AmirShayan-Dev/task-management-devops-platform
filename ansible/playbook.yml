@@ -1,0 +1,220 @@
+---
+- name: Provision DevOps Project VPS
+  hosts: vps
+  become: true
+
+  vars:
+    deploy_user: deploy
+    project_group: devops
+    project_dir: /srv/task-management-devops-platform
+    kubeconfig_path: /etc/rancher/k3s/k3s.yaml
+
+    base_packages:
+      - curl
+      - wget
+      - git
+      - vim
+      - htop
+      - unzip
+      - ca-certificates
+      - gnupg
+      - lsb-release
+      - ufw
+      - bash-completion
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Upgrade installed packages
+      apt:
+        upgrade: dist
+
+    - name: Install base packages
+      apt:
+        name: "{{ base_packages }}"
+        state: present
+
+    - name: Create project group
+      group:
+        name: "{{ project_group }}"
+        state: present
+
+    - name: Create deploy user
+      user:
+        name: "{{ deploy_user }}"
+        shell: /bin/bash
+        groups: "{{ project_group }}"
+        append: true
+        create_home: true
+        state: present
+
+    - name: Create project directory
+      file:
+        path: "{{ project_dir }}"
+        state: directory
+        owner: "{{ deploy_user }}"
+        group: "{{ project_group }}"
+        mode: "2775"
+
+    - name: Check if Docker is installed
+      command: docker --version
+      register: docker_check
+      ignore_errors: true
+      changed_when: false
+
+    - name: Install Docker
+      shell: curl -fsSL https://get.docker.com | sh
+      when: docker_check.rc != 0
+
+    - name: Enable and start Docker
+      systemd:
+        name: docker
+        enabled: true
+        state: started
+
+    - name: Add deploy user to docker group
+      user:
+        name: "{{ deploy_user }}"
+        groups: docker
+        append: true
+
+    - name: Check if K3s is installed
+      command: k3s --version
+      register: k3s_check
+      ignore_errors: true
+      changed_when: false
+
+    - name: Install K3s
+      shell: curl -sfL https://get.k3s.io | sh -
+      when: k3s_check.rc != 0
+
+    - name: Enable and start K3s
+      systemd:
+        name: k3s
+        enabled: true
+        state: started
+
+    - name: Wait for K3s kubeconfig to exist
+      wait_for:
+        path: "{{ kubeconfig_path }}"
+        timeout: 120
+
+    - name: Create root kube directory
+      file:
+        path: /root/.kube
+        state: directory
+        owner: root
+        group: root
+        mode: "0700"
+
+    - name: Copy kubeconfig for root
+      copy:
+        src: "{{ kubeconfig_path }}"
+        dest: /root/.kube/config
+        remote_src: true
+        owner: root
+        group: root
+        mode: "0600"
+
+    - name: Add KUBECONFIG to root bashrc
+      lineinfile:
+        path: /root/.bashrc
+        line: "export KUBECONFIG=/root/.kube/config"
+        create: true
+
+    - name: Create deploy kube directory
+      file:
+        path: "/home/{{ deploy_user }}/.kube"
+        state: directory
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_user }}"
+        mode: "0700"
+
+    - name: Copy kubeconfig for deploy user
+      copy:
+        src: "{{ kubeconfig_path }}"
+        dest: "/home/{{ deploy_user }}/.kube/config"
+        remote_src: true
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_user }}"
+        mode: "0600"
+
+    - name: Add KUBECONFIG to deploy bashrc
+      lineinfile:
+        path: "/home/{{ deploy_user }}/.bashrc"
+        line: "export KUBECONFIG=$HOME/.kube/config"
+        create: true
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_user }}"
+
+    - name: Check if Helm is installed
+      command: helm version
+      register: helm_check
+      ignore_errors: true
+      changed_when: false
+
+    - name: Install Helm
+      shell: curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      when: helm_check.rc != 0
+
+    - name: Allow SSH through firewall
+      ufw:
+        rule: allow
+        name: OpenSSH
+
+    - name: Allow HTTP
+      ufw:
+        rule: allow
+        port: "80"
+        proto: tcp
+
+    - name: Allow HTTPS
+      ufw:
+        rule: allow
+        port: "443"
+        proto: tcp
+
+    - name: Allow Grafana demo port
+      ufw:
+        rule: allow
+        port: "3000"
+        proto: tcp
+
+    - name: Allow Prometheus demo port
+      ufw:
+        rule: allow
+        port: "9090"
+        proto: tcp
+
+    - name: Enable UFW
+      ufw:
+        state: enabled
+        policy: deny
+
+    - name: Add kubectl alias for root
+      lineinfile:
+        path: /root/.bashrc
+        line: "alias k=kubectl"
+        create: true
+
+    - name: Add kubectl alias for deploy user
+      lineinfile:
+        path: "/home/{{ deploy_user }}/.bashrc"
+        line: "alias k=kubectl"
+        create: true
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_user }}"
+
+    - name: Show cluster nodes
+      command: kubectl get nodes
+      environment:
+        KUBECONFIG: /root/.kube/config
+      register: nodes_output
+      changed_when: false
+
+    - name: Print cluster nodes
+      debug:
+        var: nodes_output.stdout_lines
