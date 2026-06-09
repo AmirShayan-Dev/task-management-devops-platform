@@ -41,29 +41,29 @@ spec:
                   name: backend-secret
                   key: DATABASE_URL
 
-            - name: POSTGRES_HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: backend-config
-                  key: POSTGRES_HOST
+            # - name: POSTGRES_HOST
+            #   valueFrom:
+            #     configMapKeyRef:
+            #       name: backend-config
+            #       key: POSTGRES_HOST
 
-            - name: POSTGRES_DB
-              valueFrom:
-                configMapKeyRef:
-                  name: backend-config
-                  key: POSTGRES_DB
+            # - name: POSTGRES_DB
+            #   valueFrom:
+            #     configMapKeyRef:
+            #       name: backend-config
+            #       key: POSTGRES_DB
 
-            - name: POSTGRES_USER
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secret
-                  key: POSTGRES_USER
+            # - name: POSTGRES_USER
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: backend-secret
+            #       key: POSTGRES_USER
 
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secret
-                  key: POSTGRES_PASSWORD
+            # - name: POSTGRES_PASSWORD
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: backend-secret
+            #       key: POSTGRES_PASSWORD
 
             - name: REDIS_HOST
               valueFrom:
