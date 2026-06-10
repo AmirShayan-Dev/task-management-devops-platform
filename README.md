@@ -16,6 +16,8 @@ This project demonstrates how a full-stack application can be containerized, dep
 
 The application is deployed on a VPS and exposed through an .ir domain using Cloudflare routing.
 
+> Note: In a production environment, monitoring tools such as Grafana and Prometheus should be protected and not exposed publicly without authentication and access control.
+
 ---
 
 ## Overview
@@ -67,7 +69,9 @@ text User   |   v Cloudflare / Domain Routing   |   v Ingress Controller   |   v
 
 ## Repository Structure
 
-text . ├── backend/ │   ├── app/ │   ├── Dockerfile │   └── requirements.txt │ ├── frontend/ │   ├── src/ │   ├── Dockerfile │   ├── nginx.conf │   └── package.json │ ├── k8s/ │   ├── backend/ │   ├── frontend/ │   ├── database/ │   ├── redis/ │   ├── namespaces/ │   └── ingress/ │ ├── ansible/ │   ├── inventory.ini │   └── playbook.yml │ ├── .github/ │   └── workflows/ │ └── docker-compose.yml 
+text . ├── backend/ │   ├── app/ │   ├── Dockerfile │   └── requirements.txt │ ├── frontend/ │   ├── src/ │   ├── Dockerfile │   ├── nginx.conf │   └── package.json │ ├── k8s/ │   ├── backend/ │   ├── frontend/ │   ├── database/ │   ├── redis/ │   ├── namespaces/ │   └── ingress/ │ ├── ansible/ │   ├── inventory.example.ini │   ├── inventory.ini │   └── playbook.yml │ ├── .github/ │   └── workflows/ │ └── docker-compose.yml 
+
+> The real ansible/inventory.ini file should not be committed if it contains a real VPS IP address or private server information. Use inventory.example.ini as a safe template.
 
 ---
 
@@ -110,6 +114,10 @@ Key points:
 - Includes healthcheck support
 - Runs as a non-root user
 
+Build the backend image manually:
+
+bash docker build -t task-backend:local ./backend 
+
 ### Frontend
 
 The frontend Dockerfile uses a multi-stage build.
@@ -123,9 +131,9 @@ Key points:
 - Runs as a non-root user
 - Includes healthcheck support
 
-Build images manually:
+Build the frontend image manually:
 
-bash docker build -t task-backend:local ./backend docker build -t task-frontend:local ./frontend 
+bash docker build -t task-frontend:local ./frontend 
 
 ---
 
@@ -239,7 +247,9 @@ text https://prometheus.coddit.ir/query
 
 Port-forward access can also be used:
 
-bash kubectl port-forward svc/monitoring-grafana 3000:80 -n monitoring kubectl port-forward svc/monitoring-kube-prometheus-prometheus 9090:9090 -n monitoring 
+bash kubectl port-forward svc/monitoring-grafana 3000:80 -n monitoring 
+
+bash kubectl port-forward svc/monitoring-kube-prometheus-prometheus 9090:9090 -n monitoring 
 
 ---
 
@@ -331,6 +341,32 @@ bash kubectl top nodes kubectl top pods -A
 
 ---
 
+## API
+
+The backend exposes FastAPI endpoints.
+
+Swagger UI:
+
+text https://www.coddit.ir/docs 
+
+OpenAPI JSON:
+
+text https://www.coddit.ir/openapi.json 
+
+Example endpoints:
+
+text GET  /api/tasks/ POST /api/tasks/ GET  /health 
+
+Example request:
+
+bash curl https://www.coddit.ir/api/tasks/ 
+
+Create a task:
+
+bash curl -X POST https://www.coddit.ir/api/tasks/ \   -H "Content-Type: application/json" \   -d '{"title":"Test task","status":"pending","owner_id":1}' 
+
+---
+
 ## Troubleshooting Notes
 
 ### PostgreSQL Probe Issue
@@ -351,8 +387,6 @@ bash pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
 
 PostgreSQL defaults the database name to the username if no database is specified.
 
----
-
 ### Frontend Build Issue on VPS
 
 The frontend Docker build worked locally but failed on the VPS with:
@@ -363,33 +397,13 @@ This was related to network instability during npm package download inside Docke
 
 Useful checks:
 
-bash docker run --rm node:20-bookworm-slim npm config get registry docker run --rm node:20-bookworm-slim npm view react version 
+bash docker run --rm node:20-bookworm-slim npm config get registry 
+
+bash docker run --rm node:20-bookworm-slim npm view react version 
 
 A useful workaround:
 
 bash docker build --network=host --no-cache --progress=plain -t task-frontend:local ./frontend 
-
----
-
-## API
-
-The backend exposes FastAPI endpoints.
-
-Swagger UI:
-
-text https://www.coddit.ir/docs 
-
-OpenAPI JSON:
-
-text https://www.coddit.ir/openapi.json 
-
-Example endpoints:
-
-text GET  /api/tasks/ POST /api/tasks/ GET  /health 
-
-Example request:
-
-bash curl https://www.coddit.ir/api/tasks/ 
 
 ---
 
