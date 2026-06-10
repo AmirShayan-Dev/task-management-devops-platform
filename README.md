@@ -14,7 +14,7 @@ This project demonstrates how a full-stack application can be containerized, dep
 | Grafana | https://grafana.coddit.ir/login |
 | Prometheus | https://prometheus.coddit.ir/query |
 
-The application is deployed on a VPS and exposed through an .ir domain using Cloudflare routing.
+The application is deployed on a VPS and exposed through an `.ir` domain using Cloudflare routing.
 
 > Note: In a production environment, monitoring tools such as Grafana and Prometheus should be protected and not exposed publicly without authentication and access control.
 
@@ -38,7 +38,44 @@ The main goal of this project is to demonstrate the DevOps lifecycle around an a
 
 ## Architecture
 
-text User   |   v Cloudflare / Domain Routing   |   v Ingress Controller   |   v Frontend Service   |   v Frontend Pods   |   v Backend Service   |   v Backend Pods   |   +------------------> PostgreSQL Service   |                         |   |                         v   |                  PostgreSQL StatefulSet + PVC   |   +------------------> Redis Service  Monitoring: Prometheus collects metrics from Kubernetes, nodes, pods, and services. Grafana visualizes the collected metrics through dashboards.  CI/CD: GitHub Actions builds Docker images, pushes them to Docker Hub, connects to the VPS, applies Kubernetes manifests, and restarts deployments.  Provisioning: Ansible prepares the VPS environment and installs required tools. 
+```text
+User
+  |
+  v
+Cloudflare / Domain Routing
+  |
+  v
+Ingress Controller
+  |
+  v
+Frontend Service
+  |
+  v
+Frontend Pods
+  |
+  v
+Backend Service
+  |
+  v
+Backend Pods
+  |
+  +------------------> PostgreSQL Service
+  |                         |
+  |                         v
+  |                  PostgreSQL StatefulSet + PVC
+  |
+  +------------------> Redis Service
+
+Monitoring:
+Prometheus collects metrics from Kubernetes, nodes, pods, and services.
+Grafana visualizes the collected metrics through dashboards.
+
+CI/CD:
+GitHub Actions builds Docker images, pushes them to Docker Hub, connects to the VPS, applies Kubernetes manifests, and restarts deployments.
+
+Provisioning:
+Ansible prepares the VPS environment and installs required tools.
+```
 
 ---
 
@@ -69,31 +106,69 @@ text User   |   v Cloudflare / Domain Routing   |   v Ingress Controller   |   v
 
 ## Repository Structure
 
-text . ├── backend/ │   ├── app/ │   ├── Dockerfile │   └── requirements.txt │ ├── frontend/ │   ├── src/ │   ├── Dockerfile │   ├── nginx.conf │   └── package.json │ ├── k8s/ │   ├── backend/ │   ├── frontend/ │   ├── database/ │   ├── redis/ │   ├── namespaces/ │   └── ingress/ │ ├── ansible/ │   ├── inventory.example.ini │   ├── inventory.ini │   └── playbook.yml │ ├── .github/ │   └── workflows/ │ └── docker-compose.yml 
+```text
+.
+├── backend/
+│   ├── app/
+│   ├── Dockerfile
+│   └── requirements.txt
+│
+├── frontend/
+│   ├── src/
+│   ├── Dockerfile
+│   ├── nginx.conf
+│   └── package.json
+│
+├── k8s/
+│   ├── backend/
+│   ├── frontend/
+│   ├── database/
+│   ├── redis/
+│   ├── namespaces/
+│   └── ingress/
+│
+├── ansible/
+│   ├── inventory.example.ini
+│   ├── inventory.ini
+│   └── playbook.yml
+│
+├── .github/
+│   └── workflows/
+│
+└── docker-compose.yml
+```
 
-> The real ansible/inventory.ini file should not be committed if it contains a real VPS IP address or private server information. Use inventory.example.ini as a safe template.
+> The real `ansible/inventory.ini` file should not be committed if it contains a real VPS IP address or private server information. Use `inventory.example.ini` as a safe template.
 
 ---
 
 ## Local Development
 
-The project includes a docker-compose.yml file in the root directory for local development and testing.
+The project includes a `docker-compose.yml` file in the root directory for local development and testing.
 
 Run the full application stack locally:
 
-bash docker compose up -d 
+```bash
+docker compose up -d
+```
 
 Check running containers:
 
-bash docker compose ps 
+```bash
+docker compose ps
+```
 
 View logs:
 
-bash docker compose logs 
+```bash
+docker compose logs
+```
 
 Stop the stack:
 
-bash docker compose down 
+```bash
+docker compose down
+```
 
 ---
 
@@ -108,7 +183,7 @@ The backend Dockerfile builds the FastAPI application image.
 Key points:
 
 - Python-based image
-- Installs dependencies from requirements.txt
+- Installs dependencies from `requirements.txt`
 - Runs the application with Uvicorn/Gunicorn
 - Uses environment variables for external services
 - Includes healthcheck support
@@ -116,7 +191,9 @@ Key points:
 
 Build the backend image manually:
 
-bash docker build -t task-backend:local ./backend 
+```bash
+docker build -t task-backend:local ./backend
+```
 
 ### Frontend
 
@@ -133,7 +210,9 @@ Key points:
 
 Build the frontend image manually:
 
-bash docker build -t task-frontend:local ./frontend 
+```bash
+docker build -t task-frontend:local ./frontend
+```
 
 ---
 
@@ -145,7 +224,33 @@ The pipeline is triggered when changes are pushed to the main branch.
 
 CI/CD flow:
 
-text Push to GitHub   |   v GitHub Actions workflow starts   |   v Build backend Docker image   |   v Build frontend Docker image   |   v Push images to Docker Hub   |   v Connect to VPS using SSH   |   v Update project files on VPS   |   v Apply Kubernetes manifests   |   v Restart backend and frontend deployments 
+```text
+Push to GitHub
+  |
+  v
+GitHub Actions workflow starts
+  |
+  v
+Build backend Docker image
+  |
+  v
+Build frontend Docker image
+  |
+  v
+Push images to Docker Hub
+  |
+  v
+Connect to VPS using SSH
+  |
+  v
+Update project files on VPS
+  |
+  v
+Apply Kubernetes manifests
+  |
+  v
+Restart backend and frontend deployments
+```
 
 GitHub Secrets are used to store sensitive values such as:
 
@@ -161,9 +266,9 @@ GitHub Secrets are used to store sensitive values such as:
 
 The application is deployed on a K3s Kubernetes cluster running on a VPS.
 
-Application resources are deployed in the production namespace.
+Application resources are deployed in the `production` namespace.
 
-Monitoring resources are deployed in the monitoring namespace.
+Monitoring resources are deployed in the `monitoring` namespace.
 
 Kubernetes resources include:
 
@@ -202,7 +307,9 @@ The application is exposed using Ingress and Cloudflare routing.
 
 Public application URL:
 
-text https://www.coddit.ir/ 
+```text
+https://www.coddit.ir/
+```
 
 ---
 
@@ -210,7 +317,7 @@ text https://www.coddit.ir/
 
 Monitoring is implemented with Prometheus and Grafana.
 
-The monitoring stack is deployed in the monitoring namespace.
+The monitoring stack is deployed in the `monitoring` namespace.
 
 Prometheus collects metrics from:
 
@@ -239,17 +346,25 @@ Dashboards include:
 
 Access Grafana:
 
-text https://grafana.coddit.ir/login 
+```text
+https://grafana.coddit.ir/login
+```
 
 Access Prometheus:
 
-text https://prometheus.coddit.ir/query 
+```text
+https://prometheus.coddit.ir/query
+```
 
 Port-forward access can also be used:
 
-bash kubectl port-forward svc/monitoring-grafana 3000:80 -n monitoring 
+```bash
+kubectl port-forward svc/monitoring-grafana 3000:80 -n monitoring
+```
 
-bash kubectl port-forward svc/monitoring-kube-prometheus-prometheus 9090:9090 -n monitoring 
+```bash
+kubectl port-forward svc/monitoring-kube-prometheus-prometheus 9090:9090 -n monitoring
+```
 
 ---
 
@@ -271,11 +386,15 @@ Provisioning tasks include:
 
 Test Ansible connection:
 
-bash ansible all -i ansible/inventory.ini -m ping 
+```bash
+ansible all -i ansible/inventory.ini -m ping
+```
 
 Run the playbook:
 
-bash ansible-playbook -i ansible/inventory.ini ansible/playbook.yml 
+```bash
+ansible-playbook -i ansible/inventory.ini ansible/playbook.yml
+```
 
 Ansible prepares the server, while GitHub Actions handles application deployment.
 
@@ -305,39 +424,64 @@ This keeps configuration separate from application code.
 
 Check cluster nodes:
 
-bash kubectl get nodes 
+```bash
+kubectl get nodes
+```
 
 Check all pods:
 
-bash kubectl get pods -A 
+```bash
+kubectl get pods -A
+```
 
 Check production resources:
 
-bash kubectl get pods -n production kubectl get svc -n production kubectl get ingress -n production kubectl get pvc -n production 
+```bash
+kubectl get pods -n production
+kubectl get svc -n production
+kubectl get ingress -n production
+kubectl get pvc -n production
+```
 
 Check monitoring resources:
 
-bash kubectl get pods -n monitoring kubectl get svc -n monitoring 
+```bash
+kubectl get pods -n monitoring
+kubectl get svc -n monitoring
+```
 
 View backend logs:
 
-bash kubectl logs deployment/backend -n production 
+```bash
+kubectl logs deployment/backend -n production
+```
 
 View PostgreSQL logs:
 
-bash kubectl logs statefulset/postgres -n production 
+```bash
+kubectl logs statefulset/postgres -n production
+```
 
 Restart backend and frontend:
 
-bash kubectl rollout restart deployment/backend -n production kubectl rollout restart deployment/frontend -n production 
+```bash
+kubectl rollout restart deployment/backend -n production
+kubectl rollout restart deployment/frontend -n production
+```
 
 Check rollout status:
 
-bash kubectl rollout status deployment/backend -n production kubectl rollout status deployment/frontend -n production 
+```bash
+kubectl rollout status deployment/backend -n production
+kubectl rollout status deployment/frontend -n production
+```
 
 Check resource usage:
 
-bash kubectl top nodes kubectl top pods -A 
+```bash
+kubectl top nodes
+kubectl top pods -A
+```
 
 ---
 
@@ -347,23 +491,37 @@ The backend exposes FastAPI endpoints.
 
 Swagger UI:
 
-text https://www.coddit.ir/docs 
+```text
+https://www.coddit.ir/docs
+```
 
 OpenAPI JSON:
 
-text https://www.coddit.ir/openapi.json 
+```text
+https://www.coddit.ir/openapi.json
+```
 
 Example endpoints:
 
-text GET  /api/tasks/ POST /api/tasks/ GET  /health 
+```text
+GET  /api/tasks/
+POST /api/tasks/
+GET  /health
+```
 
 Example request:
 
-bash curl https://www.coddit.ir/api/tasks/ 
+```bash
+curl https://www.coddit.ir/api/tasks/
+```
 
 Create a task:
 
-bash curl -X POST https://www.coddit.ir/api/tasks/ \   -H "Content-Type: application/json" \   -d '{"title":"Test task","status":"pending","owner_id":1}' 
+```bash
+curl -X POST https://www.coddit.ir/api/tasks/ \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Test task","status":"pending","owner_id":1}'
+```
 
 ---
 
@@ -373,17 +531,23 @@ bash curl -X POST https://www.coddit.ir/api/tasks/ \   -H "Content-Type: applica
 
 PostgreSQL logs showed:
 
-text FATAL: database "myuser" does not exist 
+```text
+FATAL: database "myuser" does not exist
+```
 
-The cause was that pg_isready was checking only the user and not the database.
+The cause was that `pg_isready` was checking only the user and not the database.
 
 Incorrect:
 
-bash pg_isready -U $POSTGRES_USER 
+```bash
+pg_isready -U $POSTGRES_USER
+```
 
 Correct:
 
-bash pg_isready -U $POSTGRES_USER -d $POSTGRES_DB 
+```bash
+pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
+```
 
 PostgreSQL defaults the database name to the username if no database is specified.
 
@@ -391,19 +555,28 @@ PostgreSQL defaults the database name to the username if no database is specifie
 
 The frontend Docker build worked locally but failed on the VPS with:
 
-text npm error code ECONNRESET npm error network read ECONNRESET 
+```text
+npm error code ECONNRESET
+npm error network read ECONNRESET
+```
 
 This was related to network instability during npm package download inside Docker on the VPS.
 
 Useful checks:
 
-bash docker run --rm node:20-bookworm-slim npm config get registry 
+```bash
+docker run --rm node:20-bookworm-slim npm config get registry
+```
 
-bash docker run --rm node:20-bookworm-slim npm view react version 
+```bash
+docker run --rm node:20-bookworm-slim npm view react version
+```
 
 A useful workaround:
 
-bash docker build --network=host --no-cache --progress=plain -t task-frontend:local ./frontend 
+```bash
+docker build --network=host --no-cache --progress=plain -t task-frontend:local ./frontend
+```
 
 ---
 
