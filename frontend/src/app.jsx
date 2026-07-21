@@ -26,7 +26,7 @@ function App() {
       fontWeight: "600",
     }}
   >
-    chetori rifikh
+    chetorii rifikh
   </div>
 
   <img
